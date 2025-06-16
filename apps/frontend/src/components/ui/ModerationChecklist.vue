@@ -366,7 +366,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   LeftArrowIcon,
   RightArrowIcon,
@@ -380,6 +380,14 @@ import {
 } from "@modrinth/assets";
 import { ButtonStyled, MarkdownEditor, OverflowMenu, Collapsible } from "@modrinth/ui";
 import Categories from "~/components/ui/search/Categories.vue";
+import getRawModerationMessage, {
+  type ModerationCategory,
+  type ModerationModpackFileMeta,
+  type ModerationOption,
+  type ModerationProjectMetadata,
+  type ModerationStatus,
+  type ModerationStep,
+} from "~/helpers/moderation.ts";
 
 const props = defineProps({
   project: {
@@ -423,10 +431,14 @@ const steps = computed(() =>
         "Loaders allowed if they choose to separate their project into Forge and Fabric variants (discouraged)",
       ],
       options: [
+        //         {
+        //           name: "Contains useless info",
+        //           resultingMessage: `## Misuse of Title
+        // Per section 5.2 of [Modrinth's Content Rules](https://modrinth.com/legal/rules#miscellaneous) we ask that you limit the title to just the name of your project. Additional information, such as themes, tags, supported versions or loaders, etc. should be saved for the Summary or Description. When changing your project title, remember to also ensure that your project slug (URL) matches and accurately represents your project.`,
+        //         },
         {
           name: "Contains useless info",
-          resultingMessage: `## Misuse of Title
-Per section 5.2 of [Modrinth's Content Rules](https://modrinth.com/legal/rules#miscellaneous) we ask that you limit the title to just the name of your project. Additional information, such as themes, tags, supported versions or loaders, etc. should be saved for the Summary or Description. When changing your project title, remember to also ensure that your project slug (URL) matches and accurately represents your project.`,
+          resultingMessage: titleThing,
         },
         {
           name: "Minecraft title",
@@ -779,15 +791,20 @@ Under normal circumstances, your project would be rejected due to the issues lis
   ].filter((x) => x.shown),
 );
 
-const currentStepIndex = ref(0);
-const selectedOptions = ref({});
+const titleThing: string = await getRawModerationMessage("title", "useless-info");
 
-function toggleOption(stepId, option) {
+const currentStepIndex = ref<number>(0);
+const selectedOptions = ref<ModerationOption[]>([]);
+// const selectedOptions = ref({});
+
+function toggleOption(stepId: ModerationCategory, option: ModerationOption) {
   if (!selectedOptions.value[stepId]) {
     selectedOptions.value[stepId] = [];
   }
 
-  const index = selectedOptions.value[stepId].findIndex((x) => x.name === option.name);
+  const index = selectedOptions.value[stepId].findIndex(
+    (x: ModerationOption) => x.name === option.name,
+  );
   if (index === -1) {
     selectedOptions.value[stepId].push(option);
   } else {
@@ -822,10 +839,12 @@ async function nextPage() {
 async function initializeModPackData() {
   startLoading();
   try {
-    const raw = await useBaseFetch(`moderation/project/${props.project.id}`, { internal: true });
-    const projects = [];
+    const raw = (await useBaseFetch(`moderation/project/${props.project.id}`, {
+      internal: true,
+    })) as ModerationProjectMetadata;
+    const projects: ModerationModpackFileMeta[] = [];
 
-    for (const [hash, fileName] of Object.entries(raw.unknown_files)) {
+    for (const { hash, fileName } of raw.unknown_files) {
       projects.push({
         type: "unknown",
         hash,
@@ -835,7 +854,7 @@ async function initializeModPackData() {
       });
     }
 
-    for (const [hash, file] of Object.entries(raw.flame_files)) {
+    for (const { hash, file } of raw.flame_files) {
       projects.push({
         type: "flame",
         hash,
@@ -848,7 +867,7 @@ async function initializeModPackData() {
       });
     }
 
-    for (const [hash, file] of Object.entries(raw.identified)) {
+    for (const { hash, file } of raw.identified) {
       if (file.status !== "yes" && file.status !== "with-attribution-and-source") {
         projects.push({
           type: "identified",
@@ -873,7 +892,7 @@ async function initializeModPackData() {
   stopLoading();
 }
 
-const modPackData = ref(null);
+const modPackData = ref<ModerationModpackFileMeta[] | null>(null);
 const modPackIndex = ref(0);
 
 const fileApprovalTypes = ref([
@@ -1044,7 +1063,7 @@ async function generateMessage() {
 }
 
 const done = ref(false);
-async function sendMessage(status) {
+async function sendMessage(status: ModerationStatus) {
   startLoading();
   try {
     await useBaseFetch(`project/${props.project.id}`, {

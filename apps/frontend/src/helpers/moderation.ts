@@ -30,6 +30,8 @@ export type ModerationOptionFiller = {
   id: string;
   question: string;
   required: boolean;
+  large?: boolean;
+  value?: string;
 };
 
 export type ModerationOption = {
@@ -70,6 +72,7 @@ export type ModerationModpackFileMeta = {
   url?: string;
   id?: string;
   title?: string;
+  proof?: string;
 };
 
 export type ModerationProjectMetadata = {

@@ -794,7 +794,7 @@ Under normal circumstances, your project would be rejected due to the issues lis
 const titleThing: string = await getRawModerationMessage("title", "useless-info");
 
 const currentStepIndex = ref<number>(0);
-const selectedOptions = ref<ModerationOption[]>([]);
+const selectedOptions = ref<ModerationStep[]>([]);
 // const selectedOptions = ref({});
 
 function toggleOption(stepId: ModerationCategory, option: ModerationOption) {
@@ -935,10 +935,11 @@ const filePermissionTypes = ref([
 const message = ref("");
 const generatedMessage = ref(false);
 const loadingMessage = ref(false);
+
 async function generateMessage() {
   message.value = "";
   loadingMessage.value = true;
-  function printMods(mods, msg) {
+  function printMods(mods, msg: string) {
     if (mods.length === 0) {
       return;
     }
@@ -1039,7 +1040,7 @@ async function generateMessage() {
     }
   }
 
-  for (const options of Object.values(selectedOptions.value)) {
+  for (const options of selectedOptions.value) {
     for (const option of options) {
       let addonMessage = option.resultingMessage;
 

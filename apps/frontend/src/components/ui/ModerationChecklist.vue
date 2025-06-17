@@ -366,7 +366,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   LeftArrowIcon,
   RightArrowIcon,
@@ -380,6 +380,7 @@ import {
 } from "@modrinth/assets";
 import { ButtonStyled, MarkdownEditor, OverflowMenu, Collapsible } from "@modrinth/ui";
 import Categories from "~/components/ui/search/Categories.vue";
+import type { ModerationStep } from "~/helpers/moderation";
 
 const props = defineProps({
   project: {
@@ -403,7 +404,7 @@ const props = defineProps({
 
 const emit = defineEmits(["exit", "toggleCollapsed"]);
 
-const steps = computed(() =>
+const steps = computed<ModerationStep[]>(() =>
   [
     {
       id: "title",

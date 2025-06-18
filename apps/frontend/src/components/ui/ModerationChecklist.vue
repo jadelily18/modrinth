@@ -999,38 +999,6 @@ async function generateMessage() {
       }
     });
 
-    // for (const project of modPackData.value as ChecklistModpackEntryMeta[]) {
-    //   if (project.type === "unknown") {
-    //     updateProjects[project.hash] = {
-    //       type: "unknown",
-    //       status: project.status,
-    //       proof: project.proof,
-    //       title: project.title,
-    //       link: project.url,
-    //     };
-    //   }
-
-    //   if (project.type === "flame") {
-    //     updateProjects[project.hash] = {
-    //       type: "flame",
-    //       status: project.status,
-    //       id: project.id,
-    //       link: project.url,
-    //       title: project.title,
-    //     };
-    //   }
-
-    //   if (project.status === "with-attribution" && !project.approved) {
-    //     attributeMods.push(project.file_name);
-    //   } else if (project.status === "unidentified" && !project.approved) {
-    //     unidentifiedMods.push(project.file_name);
-    //   } else if (project.status === "no" && !project.approved) {
-    //     noMods.push(project.file_name);
-    //   } else if (project.status === "permanent-no") {
-    //     permanentNoMods.push(project.file_name);
-    //   }
-    // }
-
     if (updateProjects) {
       try {
         await useBaseFetch(`moderation/project`, {

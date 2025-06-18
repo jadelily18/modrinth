@@ -379,11 +379,9 @@ import {
   ScaleIcon,
 } from "@modrinth/assets";
 import { ButtonStyled, MarkdownEditor, OverflowMenu, Collapsible } from "@modrinth/ui";
-import { set } from "@vueuse/core";
 import Categories from "~/components/ui/search/Categories.vue";
 import type {
   ChecklistModpackEntryMeta,
-  ChecklistOption,
   ChecklistModpackProjectMetadata,
   ChecklistStep,
 } from "~/helpers/moderation";
@@ -950,7 +948,7 @@ async function generateMessage() {
     const permanentNoMods = [];
     const unidentifiedMods = [];
 
-    for (const project of modPackData.value) {
+    for (const project of modPackData.value as ChecklistModpackEntryMeta[]) {
       if (project.type === "unknown") {
         updateProjects[project.hash] = {
           type: "unknown",

@@ -59,6 +59,7 @@ export type ChecklistModpackEntryMeta = {
   id?: string;
   title?: string;
   proof?: string;
+  link?: string;
 };
 
 export type ChecklistModpackIdentifiedFile = {

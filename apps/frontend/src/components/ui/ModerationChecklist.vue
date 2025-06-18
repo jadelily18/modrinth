@@ -941,7 +941,7 @@ const loadingMessage = ref(false);
 async function generateMessage() {
   message.value = "";
   loadingMessage.value = true;
-  function printMods(mods: ChecklistModpackEntryMeta[], msg: string) {
+  function printMods(mods: string[], msg: string) {
     if (mods.length === 0) {
       return;
     }
@@ -956,16 +956,20 @@ async function generateMessage() {
   }
 
   if (modPackData.value && modPackData.value.length > 0) {
-    const updateProjects = {};
+    interface UpdateProject {
+      [id: string]: ChecklistModpackEntryMeta;
+    }
 
-    const attributeMods: ChecklistModpackEntryMeta[] = [];
-    const noMods: ChecklistModpackEntryMeta[] = [];
-    const permanentNoMods: ChecklistModpackEntryMeta[] = [];
-    const unidentifiedMods: ChecklistModpackEntryMeta[] = [];
+    const updateProjects: UpdateProject = {};
 
-    for (const project of modPackData.value as ChecklistModpackEntryMeta[]) {
+    const attributeMods: string[] = [];
+    const noMods: string[] = [];
+    const permanentNoMods: string[] = [];
+    const unidentifiedMods: string[] = [];
+
+    Object.entries(modPackData.value).forEach(([_, project]) => {
       if (project.type === "unknown") {
-        updateProjects[project.hash] = {
+        updateProjects[project.hash!] = {
           type: "unknown",
           status: project.status,
           proof: project.proof,
@@ -975,7 +979,7 @@ async function generateMessage() {
       }
 
       if (project.type === "flame") {
-        updateProjects[project.hash] = {
+        updateProjects[project.hash!] = {
           type: "flame",
           status: project.status,
           id: project.id,
@@ -985,15 +989,47 @@ async function generateMessage() {
       }
 
       if (project.status === "with-attribution" && !project.approved) {
-        attributeMods.push(project.file_name);
+        attributeMods.push(project.file_name!);
       } else if (project.status === "unidentified" && !project.approved) {
-        unidentifiedMods.push(project.file_name);
+        unidentifiedMods.push(project.file_name!);
       } else if (project.status === "no" && !project.approved) {
-        noMods.push(project.file_name);
+        noMods.push(project.file_name!);
       } else if (project.status === "permanent-no") {
-        permanentNoMods.push(project.file_name);
+        permanentNoMods.push(project.file_name!);
       }
-    }
+    });
+
+    // for (const project of modPackData.value as ChecklistModpackEntryMeta[]) {
+    //   if (project.type === "unknown") {
+    //     updateProjects[project.hash] = {
+    //       type: "unknown",
+    //       status: project.status,
+    //       proof: project.proof,
+    //       title: project.title,
+    //       link: project.url,
+    //     };
+    //   }
+
+    //   if (project.type === "flame") {
+    //     updateProjects[project.hash] = {
+    //       type: "flame",
+    //       status: project.status,
+    //       id: project.id,
+    //       link: project.url,
+    //       title: project.title,
+    //     };
+    //   }
+
+    //   if (project.status === "with-attribution" && !project.approved) {
+    //     attributeMods.push(project.file_name);
+    //   } else if (project.status === "unidentified" && !project.approved) {
+    //     unidentifiedMods.push(project.file_name);
+    //   } else if (project.status === "no" && !project.approved) {
+    //     noMods.push(project.file_name);
+    //   } else if (project.status === "permanent-no") {
+    //     permanentNoMods.push(project.file_name);
+    //   }
+    // }
 
     if (updateProjects) {
       try {

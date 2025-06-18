@@ -379,8 +379,14 @@ import {
   ScaleIcon,
 } from "@modrinth/assets";
 import { ButtonStyled, MarkdownEditor, OverflowMenu, Collapsible } from "@modrinth/ui";
+import { set } from "@vueuse/core";
 import Categories from "~/components/ui/search/Categories.vue";
-import type { ModerationStep } from "~/helpers/moderation";
+import type {
+  ChecklistModpackEntryMeta,
+  ChecklistOption,
+  ChecklistModpackProjectMetadata,
+  ChecklistStep,
+} from "~/helpers/moderation";
 
 const props = defineProps({
   project: {
@@ -404,7 +410,7 @@ const props = defineProps({
 
 const emit = defineEmits(["exit", "toggleCollapsed"]);
 
-const steps = computed<ModerationStep[]>(() =>
+const steps = computed<ChecklistStep[]>(() =>
   [
     {
       id: "title",
@@ -823,8 +829,10 @@ async function nextPage() {
 async function initializeModPackData() {
   startLoading();
   try {
-    const raw = await useBaseFetch(`moderation/project/${props.project.id}`, { internal: true });
-    const projects = [];
+    const raw = (await useBaseFetch(`moderation/project/${props.project.id}`, {
+      internal: true,
+    })) as ChecklistModpackProjectMetadata;
+    const projects: ChecklistModpackEntryMeta[] = [];
 
     for (const [hash, fileName] of Object.entries(raw.unknown_files)) {
       projects.push({
@@ -874,7 +882,7 @@ async function initializeModPackData() {
   stopLoading();
 }
 
-const modPackData = ref(null);
+const modPackData = ref<ChecklistModpackEntryMeta[] | null>(null);
 const modPackIndex = ref(0);
 
 const fileApprovalTypes = ref([
@@ -1021,7 +1029,7 @@ async function generateMessage() {
     }
   }
 
-  for (const options of Object.values(selectedOptions.value)) {
+  for (options of selectedOptions.value) {
     for (const option of options) {
       let addonMessage = option.resultingMessage;
 

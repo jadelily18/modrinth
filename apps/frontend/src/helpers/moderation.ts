@@ -1,8 +1,8 @@
 // import { useFetch } from "#imports";
 
-export type ModerationStatus = "approved" | "rejected" | "withheld";
+export type ProjectStatus = "approved" | "rejected" | "withheld";
 
-export type ModerationCategory =
+export type ChecklistCategory =
   | "title"
   | "slug"
   | "summary"
@@ -17,7 +17,7 @@ export type ModerationCategory =
   | "modpack-permissions"
   | "private-server";
 
-export type ModerationOptionFiller = {
+export type ChecklistOptionFiller = {
   id: string; // should be ModerationCategory but noooooooo
   question: string;
   required?: boolean;
@@ -25,14 +25,14 @@ export type ModerationOptionFiller = {
   value?: string;
 };
 
-export type ModerationOption = {
+export type ChecklistOption = {
   name: string;
   resultingMessage: string;
   shown?: boolean;
-  fillers?: ModerationOptionFiller[];
+  fillers?: ChecklistOptionFiller[];
 };
 
-export type ModerationStep = {
+export type ChecklistStep = {
   id: string;
   question: string;
   shown: boolean;
@@ -40,10 +40,10 @@ export type ModerationStep = {
   examples?: string[];
   exceptions?: string[];
   navigate?: string;
-  options?: ModerationOption[];
+  options?: ChecklistOption[];
 };
 
-export type ModerationModpackStatus =
+export type ChecklistModpackApprovalType =
   | "yes"
   | "with-attribution-and-source"
   | "with-attribution"
@@ -51,24 +51,10 @@ export type ModerationModpackStatus =
   | "permanent-no"
   | "unidentified";
 
-export type ModerationMetaFile = {
-  id?: string;
-  title?: string;
-  file_name?: string;
-  url?: string;
-  status?: ModerationModpackStatus;
-};
-
-export type ModerationModpackFile = {
-  hash: string;
-  fileName: string;
-  file: ModerationMetaFile;
-};
-
-export type ModerationModpackFileMeta = {
+export type ChecklistModpackEntryMeta = {
   type: "unknown" | "flame" | "identified";
   file_name?: string;
-  status?: ModerationModpackStatus | null;
+  status?: ChecklistModpackApprovalType | null;
   hash?: string;
   approved?: boolean | null;
   url?: string;
@@ -77,8 +63,20 @@ export type ModerationModpackFileMeta = {
   proof?: string;
 };
 
-export type ModerationProjectMetadata = {
-  identified: ModerationModpackFile[];
-  flame_files: ModerationModpackFile[];
-  unknown_files: ModerationModpackFile[];
+export type ChecklistModpackIdentifiedFile = {
+  file_name: string;
+  status: ChecklistModpackApprovalType;
+};
+
+export type ChecklistModpackMissingMetaFlameFile = {
+  title: string;
+  file_name: string;
+  url: string;
+  id: number;
+};
+
+export type ChecklistModpackProjectMetadata = {
+  identified: Map<string, ChecklistModpackIdentifiedFile[]>;
+  flame_files: Map<string, ChecklistModpackMissingMetaFlameFile[]>;
+  unknown_files: Map<string, string>;
 };

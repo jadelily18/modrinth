@@ -65,7 +65,9 @@
                 :class="{
                   'option-selected': modPackData[modPackIndex].status === option.id,
                 }"
-                @click="modPackData[modPackIndex].status = option.id"
+                @click="
+                  modPackData[modPackIndex].status = option.id as ChecklistModpackApprovalType
+                "
               >
                 {{ option.name }}
               </button>
@@ -123,7 +125,9 @@
                 :class="{
                   'option-selected': modPackData[modPackIndex].status === option.id,
                 }"
-                @click="modPackData[modPackIndex].status = option.id"
+                @click="
+                  modPackData[modPackIndex].status = option.id as ChecklistModpackApprovalType
+                "
               >
                 {{ option.name }}
               </button>
@@ -131,7 +135,9 @@
           </div>
           <div
             v-if="
-              ['unidentified', 'no', 'with-attribution'].includes(modPackData[modPackIndex].status)
+              ['unidentified', 'no', 'with-attribution'].includes(
+                modPackData[modPackIndex].status as ChecklistModpackApprovalType,
+              )
             "
           >
             <p v-if="modPackData[modPackIndex].status === 'unidentified'">
@@ -181,7 +187,8 @@
       </div>
       <div v-else>
         <h2 class="m-0 mb-2 text-lg font-extrabold">{{ steps[currentStepIndex].question }}</h2>
-        <template v-if="steps[currentStepIndex].rules && steps[currentStepIndex].rules.length > 0">
+        <!-- not null assertion might be a problem idk -->
+        <template v-if="steps[currentStepIndex].rules && steps[currentStepIndex].rules!.length > 0">
           <strong>Guidance:</strong>
           <ul class="mb-3 mt-2 leading-tight">
             <li v-for="(rule, index) in steps[currentStepIndex].rules" :key="index">
@@ -190,7 +197,7 @@
           </ul>
         </template>
         <template
-          v-if="steps[currentStepIndex].examples && steps[currentStepIndex].examples.length > 0"
+          v-if="steps[currentStepIndex].examples && steps[currentStepIndex].examples!.length > 0"
         >
           <strong>Reject things like:</strong>
           <ul class="mb-3 mt-2 leading-tight">
@@ -200,7 +207,9 @@
           </ul>
         </template>
         <template
-          v-if="steps[currentStepIndex].exceptions && steps[currentStepIndex].exceptions.length > 0"
+          v-if="
+            steps[currentStepIndex].exceptions && steps[currentStepIndex].exceptions!.length > 0
+          "
         >
           <strong>Exceptions:</strong>
           <ul class="mb-3 mt-2 leading-tight">
@@ -256,7 +265,7 @@
         </p>
         <div class="options input-group">
           <button
-            v-for="(option, index) in steps[currentStepIndex].options.filter(
+            v-for="(option, index) in steps[currentStepIndex].options!!.filter(
               (x) => x.shown !== false,
             )"
             :key="index"
@@ -379,10 +388,14 @@ import {
   ScaleIcon,
 } from "@modrinth/assets";
 import { ButtonStyled, MarkdownEditor, OverflowMenu, Collapsible } from "@modrinth/ui";
+import type { ApprovedStatus } from "@modrinth/utils";
 import Categories from "~/components/ui/search/Categories.vue";
 import type {
+  ChecklistCategory,
+  ChecklistModpackApprovalType,
   ChecklistModpackEntryMeta,
   ChecklistModpackProjectMetadata,
+  ChecklistOption,
   ChecklistStep,
 } from "~/helpers/moderation";
 
@@ -784,10 +797,14 @@ Under normal circumstances, your project would be rejected due to the issues lis
   ].filter((x) => x.shown),
 );
 
-const currentStepIndex = ref(0);
-const selectedOptions = ref({});
+interface SelectedOptions {
+  [id: string]: ChecklistOption[];
+}
 
-function toggleOption(stepId, option) {
+const currentStepIndex = ref(0);
+const selectedOptions = ref<SelectedOptions>({});
+
+function toggleOption(stepId: ChecklistCategory, option: ChecklistOption) {
   if (!selectedOptions.value[stepId]) {
     selectedOptions.value[stepId] = [];
   }
@@ -926,7 +943,7 @@ const loadingMessage = ref(false);
 async function generateMessage() {
   message.value = "";
   loadingMessage.value = true;
-  function printMods(mods, msg) {
+  function printMods(mods: ChecklistModpackEntryMeta[], msg: string) {
     if (mods.length === 0) {
       return;
     }
@@ -943,10 +960,10 @@ async function generateMessage() {
   if (modPackData.value && modPackData.value.length > 0) {
     const updateProjects = {};
 
-    const attributeMods = [];
-    const noMods = [];
-    const permanentNoMods = [];
-    const unidentifiedMods = [];
+    const attributeMods: ChecklistModpackEntryMeta[] = [];
+    const noMods: ChecklistModpackEntryMeta[] = [];
+    const permanentNoMods: ChecklistModpackEntryMeta[] = [];
+    const unidentifiedMods: ChecklistModpackEntryMeta[] = [];
 
     for (const project of modPackData.value as ChecklistModpackEntryMeta[]) {
       if (project.type === "unknown") {
@@ -1027,7 +1044,7 @@ async function generateMessage() {
     }
   }
 
-  for (options of selectedOptions.value) {
+  Object.entries(selectedOptions.value).forEach(([_, options]) => {
     for (const option of options) {
       let addonMessage = option.resultingMessage;
 
@@ -1043,7 +1060,8 @@ async function generateMessage() {
       message.value += addonMessage;
       message.value += "\n\n";
     }
-  }
+  });
+
   generatedMessage.value = true;
   loadingMessage.value = false;
   currentStepIndex.value += 1;
@@ -1051,7 +1069,7 @@ async function generateMessage() {
 }
 
 const done = ref(false);
-async function sendMessage(status) {
+async function sendMessage(status: ApprovedStatus) {
   startLoading();
   try {
     await useBaseFetch(`project/${props.project.id}`, {

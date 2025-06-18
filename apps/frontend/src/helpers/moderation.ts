@@ -1,7 +1,5 @@
 // import { useFetch } from "#imports";
 
-export type ProjectStatus = "approved" | "rejected" | "withheld";
-
 export type ChecklistCategory =
   | "title"
   | "slug"

@@ -275,7 +275,7 @@
                 selectedOptions[steps[currentStepIndex].id] &&
                 selectedOptions[steps[currentStepIndex].id].find((x) => x.name === option.name),
             }"
-            @click="toggleOption(steps[currentStepIndex].id, option)"
+            @click="toggleOption(steps[currentStepIndex].id as ChecklistCategory, option)"
           >
             {{ option.name }}
           </button>
@@ -301,7 +301,7 @@
                 </span>
               </label>
               <div v-if="filler.large" class="markdown-editor-spacing">
-                <MarkdownEditor v-model="filler.value" :placeholder="'Enter moderation message'" />
+                <MarkdownEditor v-model="filler.value!" :placeholder="'Enter moderation message'" />
               </div>
               <input v-else :id="filler.id" v-model="filler.value" type="text" autocomplete="off" />
             </div>
@@ -321,9 +321,7 @@
               </button>
             </ButtonStyled>
             <ButtonStyled v-if="currentStepIndex > 0">
-              <button @click="previousPage() && !done">
-                <LeftArrowIcon aria-hidden="true" /> Previous
-              </button>
+              <button @click="previousPage()"><LeftArrowIcon aria-hidden="true" /> Previous</button>
             </ButtonStyled>
           </div>
           <div class="flex items-center gap-2">
@@ -343,7 +341,7 @@
               </ButtonStyled>
               <div class="joined-buttons">
                 <ButtonStyled color="red">
-                  <button @click="sendMessage('rejected')">
+                  <button @click="sendMessage('rejected' as ApprovedStatus)">
                     <CrossIcon aria-hidden="true" /> Reject
                   </button>
                 </ButtonStyled>
@@ -354,7 +352,7 @@
                       {
                         id: 'withhold',
                         color: 'danger',
-                        action: () => sendMessage('withheld'),
+                        action: () => sendMessage('withheld' as ApprovedStatus),
                         hoverFilled: true,
                       },
                     ]"

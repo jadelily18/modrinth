@@ -396,6 +396,7 @@ import type {
   ChecklistOption,
   ChecklistStep,
 } from "~/helpers/moderation";
+import fetchModerationMessage from "~/helpers/moderation.ts";
 
 const props = defineProps({
   project: {
@@ -794,6 +795,9 @@ Under normal circumstances, your project would be rejected due to the issues lis
     },
   ].filter((x) => x.shown),
 );
+
+// sillies
+console.log(await fetchModerationMessage("title", "useless-info"));
 
 interface SelectedOptions {
   [id: string]: ChecklistOption[];

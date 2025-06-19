@@ -1,4 +1,4 @@
-// import { useFetch } from "#imports";
+import { $fetch } from "ofetch"; // works without import but gives annoying warning
 
 export type ChecklistCategory =
   | "title"
@@ -79,3 +79,12 @@ export type ChecklistModpackProjectMetadata = {
   flame_files: Map<string, ChecklistModpackMissingMetaFlameFile[]>;
   unknown_files: Map<string, string>;
 };
+
+export default async function fetchModerationMessage(
+  category: ChecklistCategory,
+  option: string,
+): Promise<string> {
+  const res = await $fetch(`/internal/moderation/messages/${category}/${option}.md`);
+
+  return res as string;
+}

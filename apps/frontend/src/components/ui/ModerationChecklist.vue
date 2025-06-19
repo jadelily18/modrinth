@@ -883,9 +883,8 @@ async function initializeModPackData() {
     }
 
     modPackData.value = projects;
-  } catch (err) {
-    const app = useNuxtApp();
-    app.$notify({
+  } catch (err: Error | any) {
+    addNotification({
       group: "main",
       title: "An error occurred",
       text: err.data ? err.data.description : err,
@@ -1006,9 +1005,8 @@ async function generateMessage() {
           method: "POST",
           body: updateProjects,
         });
-      } catch (err) {
-        const app = useNuxtApp();
-        app.$notify({
+      } catch (err: Error | any) {
+        addNotification({
           group: "main",
           title: "An error occurred",
           text: err.data ? err.data.description : err,
@@ -1095,9 +1093,8 @@ async function sendMessage(status: ApprovedStatus) {
 
     await props.resetProject();
     done.value = true;
-  } catch (err) {
-    const app = useNuxtApp();
-    app.$notify({
+  } catch (err: Error | any) {
+    addNotification({
       group: "main",
       title: "An error occurred",
       text: err.data ? err.data.description : err,
@@ -1134,11 +1131,11 @@ async function goToNextProject() {
     name: "type-id",
     params: {
       type: "project",
-      id: project,
+      id: project as string,
     },
     state: {
       showChecklist: true,
-      projects: props.futureProjects.slice(1),
+      projects: props.futureProjects.slice(1) as number[],
     },
   });
 }
